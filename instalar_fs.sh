@@ -45,6 +45,7 @@ fi
 echo " "
 runuser=$(whoami)
 
+
 # --- PASO 4: Descargar y descomprimir FacturaScript ---
 
 echo " "
