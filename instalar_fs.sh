@@ -77,3 +77,4 @@ echo "--- Instalación completada ---"
 echo "Para continuar con la instalación de FacturaScript, visita:"
 echo "http://www.sudominio.com/${installdir}"
 echo " "
+
