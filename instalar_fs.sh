@@ -22,21 +22,36 @@ fi
 echo " "
 runuser=$(whoami)
 
-# --- PASO 3: Descargar y descomprimir FacturaScript ---
+# --- PASO 3: Descargar y descomprimir FacturaScript (lógica mejorada) ---
 
 echo " "
-echo "Descargando la última versión de FacturaScript..."
-wget https://facturascripts.com/DownloadBuild/1/stable -O facturascripts.zip > /dev/null 2>&1
+echo "Buscando comando para descarga (wget o curl)..."
 
-if [ ! -f "facturascripts.zip" ]; then
+download_url="https://facturascripts.com/DownloadBuild/1/stable"
+output_file="facturascripts.zip"
+
+if command -v wget &> /dev/null
+then
+    echo "Usando wget..."
+    wget "$download_url" -O "$output_file" > /dev/null 2>&1
+elif command -v curl &> /dev/null
+then
+    echo "Usando curl..."
+    curl -sL "$download_url" -o "$output_file"
+else
+    echo "Error: No se encontró 'wget' ni 'curl'. Instala uno de los dos para continuar."
+    exit 1
+fi
+
+if [ ! -f "$output_file" ]; then
     echo "Error: No se pudo descargar FacturaScript. Revisa la URL o tu conexión."
     exit 1
 fi
 
 echo "Creando y descomprimiendo archivos en el directorio '$installdir'..."
 mkdir "$installdir"
-unzip -q facturascripts.zip -d "$installdir" > /dev/null 2>&1
-rm facturascripts.zip
+unzip -q "$output_file" -d "$installdir" > /dev/null 2>&1
+rm "$output_file"
 
 mv "$installdir/facturascripts"/* "$installdir"
 mv "$installdir/facturascripts"/.[!.]* "$installdir" 2>/dev/null
