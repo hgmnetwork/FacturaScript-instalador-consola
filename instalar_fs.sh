@@ -1,9 +1,32 @@
 #!/bin/bash
 
-# --- PASO 1: Pedir y validar el directorio de instalación ---
+# --- PASO 1: Pedir y validar la versión de instalación ---
 
 echo "--- Instalador de FacturaScript para cPanel por HGMnetwork.com ---"
 echo " "
+echo "¿Qué versión de FacturaScript deseas instalar?"
+echo "1) Estable (Recomendado)"
+echo "2) Beta"
+
+read -p "Selecciona una opción (1 o 2): " version_option
+
+if [ "$version_option" == "1" ]; then
+    DOWNLOAD_URL="https://facturascripts.com/DownloadBuild/1/stable"
+    VERSION_NAME="estable"
+elif [ "$version_option" == "2" ]; then
+    DOWNLOAD_URL="https://facturascripts.com/DownloadBuild/1/beta"
+    VERSION_NAME="beta"
+else
+    echo "Opción no válida. Se instalará la versión estable por defecto."
+    DOWNLOAD_URL="https://facturascripts.com/DownloadBuild/1/stable"
+    VERSION_NAME="estable"
+fi
+
+echo " "
+echo "Has seleccionado la versión $VERSION_NAME."
+
+# --- PASO 2: Pedir y validar el directorio de instalación ---
+
 read -p "Introduce el nombre del directorio para la instalación (ej. mi-tienda): " installdir
 
 if [ -d "$installdir" ]; then
@@ -17,47 +40,32 @@ if [ -d "$installdir" ]; then
     mv "$installdir" "$installdir.backup"
 fi
 
-# --- PASO 2: Preguntar por el usuario de ejecución ---
+# --- PASO 3: Preguntar por el usuario de ejecución ---
 
 echo " "
 runuser=$(whoami)
 
-# --- PASO 3: Descargar y descomprimir FacturaScript (lógica mejorada) ---
+# --- PASO 4: Descargar y descomprimir FacturaScript ---
 
 echo " "
-echo "Buscando comando para descarga (wget o curl)..."
+echo "Descargando la versión $VERSION_NAME de FacturaScript..."
+wget "$DOWNLOAD_URL" -O facturascripts.zip > /dev/null 2>&1
 
-download_url="https://facturascripts.com/DownloadBuild/1/stable"
-output_file="facturascripts.zip"
-
-if command -v wget &> /dev/null
-then
-    echo "Usando wget..."
-    wget "$download_url" -O "$output_file" > /dev/null 2>&1
-elif command -v curl &> /dev/null
-then
-    echo "Usando curl..."
-    curl -sL "$download_url" -o "$output_file"
-else
-    echo "Error: No se encontró 'wget' ni 'curl'. Instala uno de los dos para continuar."
-    exit 1
-fi
-
-if [ ! -f "$output_file" ]; then
+if [ ! -f "facturascripts.zip" ]; then
     echo "Error: No se pudo descargar FacturaScript. Revisa la URL o tu conexión."
     exit 1
 fi
 
 echo "Creando y descomprimiendo archivos en el directorio '$installdir'..."
 mkdir "$installdir"
-unzip -q "$output_file" -d "$installdir" > /dev/null 2>&1
-rm "$output_file"
+unzip -q facturascripts.zip -d "$installdir" > /dev/null 2>&1
+rm facturascripts.zip
 
 mv "$installdir/facturascripts"/* "$installdir"
 mv "$installdir/facturascripts"/.[!.]* "$installdir" 2>/dev/null
 rmdir "$installdir/facturascripts"
 
-# --- PASO 4: Asignar permisos ---
+# --- PASO 5: Asignar permisos ---
 
 echo " "
 echo "Asignando permisos..."
